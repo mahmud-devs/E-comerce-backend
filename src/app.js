@@ -1,7 +1,8 @@
 const express = require("express");
-
 const app = express();
+const AllRoutes = require("./Routes/index.js");
 
-app.listen(4000, () => {
-  console.log("running on 4000");
-});
+app.use( AllRoutes);
+
+
+module.exports = { app };
