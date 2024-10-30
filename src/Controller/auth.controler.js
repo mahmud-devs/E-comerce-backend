@@ -2,7 +2,7 @@ const { apiResponce } = require("../Utils/ApiResponce.js");
 const { apiError } = require("../Utils/ApiError.js");
 const { mailChecker, passwordChecker } = require("../Helpers/validator.js");
 const userModel = require("../Model/user.model.js");
-const { makeHashPassword } = require("../Helpers/bcrypt.js");
+const { makeHashPassword, comparePassword } = require("../Helpers/bcrypt.js");
 const { sendMail } = require("../Helpers/nodeMailer.js");
 const { numberGenerate } = require("../Helpers/numberGenerator.js");
 
@@ -99,9 +99,11 @@ const verifyOtp = async (req, res) => {
 
     // ============ verify user with otp==================
 
-    const isExistUser = await userModel.findOne({
-      $or: [{ email: emailormobile }, { OTP: otp }],
-    }).select("-password ")
+    const isExistUser = await userModel
+      .findOne({
+        $or: [{ email: emailormobile }, { OTP: otp }],
+      })
+      .select("-password ");
 
     if (!isExistUser) {
       return res
@@ -120,7 +122,7 @@ const verifyOtp = async (req, res) => {
         new apiResponce(true, isExistUser, "otp verify successfull", false)
       );
   } catch (error) {
-    console.log(error);
+    console.log(`${error}`);
 
     return res
       .status(501)
@@ -128,4 +130,39 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-module.exports = { Registration, verifyOtp };
+// ============= login route ================
+
+const login = async (req, res) => {
+  try {
+    const { emailormobile, password } = req.body;
+    if (!emailormobile || !password) {
+      return res
+        .status(401)
+        .json(new apiError(false, 401, null, "Login credential missing", true));
+    }
+
+    // ======== check the info in database
+
+    const loggedUser = await userModel.findOne({
+      $or: [{ email: emailormobile }, { mobile: emailormobile }],
+    });
+
+    // ========= decrypt password ==============
+
+    const isCorrectPassword = await comparePassword(
+      password,
+      loggedUser?.password
+    );
+    console.log(isCorrectPassword, "compare");
+
+    // =========
+  } catch (error) {
+    console.log(`${error}`);
+
+    return res
+      .status(501)
+      .json(new apiError(false, 501, null, "login route responce error", true));
+  }
+};
+
+module.exports = { Registration, verifyOtp, login };
