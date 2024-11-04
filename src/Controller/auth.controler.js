@@ -5,6 +5,7 @@ const userModel = require("../Model/user.model.js");
 const { makeHashPassword, comparePassword } = require("../Helpers/bcrypt.js");
 const { sendMail } = require("../Helpers/nodeMailer.js");
 const { numberGenerate } = require("../Helpers/numberGenerator.js");
+const { makeJWTToken } = require("../Helpers/jwtToken.js");
 
 const Registration = async (req, res) => {
   try {
@@ -153,7 +154,42 @@ const login = async (req, res) => {
       password,
       loggedUser?.password
     );
-    console.log(isCorrectPassword, "compare");
+
+    if (!isCorrectPassword) {
+      return res
+        .status(501)
+        .json(
+          new apiError(false, 501, null, "Password credenrial invalid", true)
+        );
+    }
+
+    // ============ generate token
+
+    const tokenCredential = {
+      id: loggedUser._id,
+      email: loggedUser.email,
+    };
+
+    const token = await makeJWTToken(tokenCredential);
+
+    if (token) {
+      return res
+        .status(200)
+        .cookie("token", token, { httpOnly: true, secure: true })
+        .json(
+          new apiResponce(
+            true,
+            200,
+            {
+              token: `Bearer ${token}`,
+              userEmail: loggedUser.email,
+              userId: loggedUser._id,
+            },
+            "Login successfull",
+            false
+          )
+        );
+    }
 
     // =========
   } catch (error) {
@@ -165,4 +201,16 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { Registration, verifyOtp, login };
+// ================ logout route ======================
+const logout = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log(`${error}`);
+
+    return res
+      .status(501)
+      .json(new apiError(false, 501, null, "logout coltroller error", true));
+  }
+};
+
+module.exports = { Registration, verifyOtp, login, logout };
