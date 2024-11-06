@@ -5,8 +5,14 @@ const mailChecker = (email) => {
 };
 
 const passwordChecker = (password) => {
-  const passwordRegex = /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,16}$/;
+  const passwordRegex =
+    /^(?=.*\d)(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,16}$/;
   return passwordRegex.test(password);
 };
 
-module.exports = { mailChecker, passwordChecker };
+const numberChecker = (number) => {
+  const numberRegex = /^(?:\+8801|01)[1-9][0-9]{8}$/;
+  return numberRegex.test(number);
+};
+
+module.exports = { mailChecker, passwordChecker, numberChecker };
