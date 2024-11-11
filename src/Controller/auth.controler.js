@@ -392,6 +392,58 @@ const resetEmail = async (req, res) => {
   }
 };
 
+// ================== recovery email =================
+
+const recoveryEmail = async (req, res) => {
+  try {
+    const { userId } = req.user;
+
+    const { recoveryEmail } = req.body;
+    if (!recoveryEmail || !mailChecker(recoveryEmail)) {
+      return res
+        .status(401)
+        .json(
+          new apiError(false, 401, null, "recovery email format invalid", true)
+        );
+    }
+
+    const recovery = await userModel.findByIdAndUpdate({ _id: userId });
+
+    if (recovery.recoveryEmail === recoveryEmail) {
+      return res
+        .status(401)
+        .json(
+          new apiError(false, 401, null, "recovery email already in use", true)
+        );
+    }
+
+    recovery.recoveryEmail = recoveryEmail;
+    await recovery.save();
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(
+          true,
+          200,
+          recovery,
+          "recovery email set successfully",
+          false
+        )
+      );
+
+    // =====================
+  } catch (error) {
+    console.log(error.code);
+
+    return res
+      .status(501)
+      .json(
+        new apiError(false, 501, null, "recovery email coltroller error", true)
+      );
+  }
+};
+
 module.exports = {
   Registration,
   verifyOtp,
@@ -399,4 +451,5 @@ module.exports = {
   logout,
   resetPassword,
   resetEmail,
+  recoveryEmail,
 };

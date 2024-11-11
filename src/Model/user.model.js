@@ -68,6 +68,10 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    recoveryEmail:{
+      type:String,
+      default:null,
+    }
   },
   {
     timestamps: true,

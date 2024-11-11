@@ -3,17 +3,22 @@ const authGuard = async (req, res, next) => {
   try {
     const { token } = req.cookies;
 
-    const decoded = await jwt.verify(token, process.env.TOKEN_SECRET);
+    if (token || req.headers.authorization) {
+      const decoded = await jwt.verify(
+        token || req.headers.authorization,
+        process.env.TOKEN_SECRET
+      );
 
-    if (decoded) {
-      const user = {
-        userEmail: decoded.email,
-        userId: decoded.id,
-      };
+      if (decoded) {
+        const user = {
+          userEmail: decoded.email,
+          userId: decoded.id,
+        };
 
-      req.user = user;
+        req.user = user;
 
-      next()
+        next();
+      }
     } else {
       return res
         .status(401)
