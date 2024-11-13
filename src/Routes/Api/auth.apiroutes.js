@@ -8,7 +8,7 @@ const {
   resetPassword,
   resetEmail,
   recoveryEmail,
-} = require("../../Controller/auth.controler.js");
+} = require("../../Controller/auth.controller.js");
 const { authGuard } = require("../../middleware/authGuard.js");
 _.route("/auth/registration").post(Registration);
 _.route("/auth/verify-otp").post(verifyOtp);

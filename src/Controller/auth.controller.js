@@ -106,7 +106,7 @@ const verifyOtp = async (req, res) => {
 
     const isExistUser = await userModel
       .findOne({
-        $or: [{ email: emailormobile }, { OTP: otp }],
+        $and: [{ email: emailormobile }, { OTP: otp }],
       })
       .select("-password ");
 
