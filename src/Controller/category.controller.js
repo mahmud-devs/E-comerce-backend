@@ -183,7 +183,7 @@ const updateSingleCategory = async (req, res) => {
     return res
       .status(501)
       .json(
-        new apiError(false, 501, null, `failedto update category !! `, true)
+        new apiError(false, 501, null, `failed to update category !! `, true)
       );
 
     // =================
