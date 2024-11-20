@@ -202,7 +202,7 @@ const deleteSubcategory = async (req, res) => {
   }
 };
 
-// ============ edit subcategory
+// ============ update subcategory
 const UpdateSubcategory = async (req, res) => {
   try {
     const { id } = req.params;
