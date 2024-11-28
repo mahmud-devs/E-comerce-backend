@@ -119,7 +119,6 @@ const updateProduct = async (req, res) => {
             splitImage[splitImage.length - 1]?.split(".")[0];
           deleteCloudinaryImage =
             await cloudinaryDeleteImage(cloudinaryImageId);
-
         }
       }
       // ============== upload new image ==============
@@ -151,7 +150,7 @@ const updateProduct = async (req, res) => {
       }
     }
 
-    // =============== without any image 
+    // =============== without any image
     const updateProductInData = await productModel.findByIdAndUpdate(
       { _id: productId },
       { ...req.body },
@@ -183,4 +182,125 @@ const updateProduct = async (req, res) => {
   }
 };
 
-module.exports = { creatProduct, updateProduct };
+// =================== get all product =======================
+
+const getAllProduct = async (req, res) => {
+  try {
+    const fetchAllProduct = await productModel.find();
+    if (fetchAllProduct?.length) {
+      return res
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            fetchAllProduct,
+            `all product fetch successfully`,
+            false
+          )
+        );
+    }
+    return res
+      .status(501)
+      .json(
+        new apiError(false, 501, null, `failed to fetch all product`, true)
+      );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          501,
+          null,
+          `error from get all product controller ${error}`,
+          true
+        )
+      );
+  }
+};
+
+// ====================== get single product ============
+
+const getSingleProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const fetchSingleProduct = await productModel.findById({ _id: productId });
+    if (fetchSingleProduct) {
+      return res
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            fetchSingleProduct,
+            `single product fetch successfully`,
+            false
+          )
+        );
+    }
+    return res
+      .status(501)
+      .json(
+        new apiError(false, 501, null, `failed to fetch single product`, true)
+      );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          501,
+          null,
+          `error from get single product controller ${error}`,
+          true
+        )
+      );
+  }
+};
+
+// =================== delete product ================
+
+const deleteProduct = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const isExistDeleteProduct = await productModel.findByIdAndDelete({
+      _id: productId,
+    });
+    if (isExistDeleteProduct) {
+      return res
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            isExistDeleteProduct,
+            `product deleted successfully`,
+            false
+          )
+        );
+    }
+    return res
+      .status(501)
+      .json(new apiError(false, 501, null, `failed to delete product`, true));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          501,
+          null,
+          `error from delete product controller ${error}`,
+          true
+        )
+      );
+  }
+};
+module.exports = {
+  creatProduct,
+  updateProduct,
+  getAllProduct,
+  getSingleProduct,
+  deleteProduct,
+};
