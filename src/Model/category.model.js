@@ -12,10 +12,12 @@ const categorySchema = new Schema({
     required: true,
     trim: true,
   },
-  subCategory: {
-    type: Schema.Types.ObjectId,
-    ref: "subCategory",
-  },
+  subCategory: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "subCategory",
+    },
+  ],
   isActive: {
     type: Boolean,
     default: false,
