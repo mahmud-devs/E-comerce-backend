@@ -60,6 +60,7 @@ const creatProduct = async (req, res) => {
       category,
       subcategory,
       image: allUploadedImage,
+      ...req.body,
     });
     if (saveProduct) {
       return res
