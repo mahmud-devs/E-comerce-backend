@@ -22,6 +22,12 @@ const categorySchema = new Schema({
       ref: "subCategory",
     },
   ],
+  product: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "product",
+    },
+  ],
   isActive: {
     type: Boolean,
     default: false,

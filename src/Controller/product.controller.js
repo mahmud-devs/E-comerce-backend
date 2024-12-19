@@ -2,6 +2,7 @@ const { apiResponce } = require("../Utils/ApiResponce.js");
 const { apiError } = require("../Utils/ApiError.js");
 
 const productModel = require("../Model/product.model.js");
+const categoryModel = require("../Model/category.model.js");
 const { StaticFileGenerator } = require("../Helpers/staticFileGenerator.js");
 const {
   cloudnirayFileUpload,
@@ -53,6 +54,8 @@ const creatProduct = async (req, res) => {
         .json(new apiError(false, 401, null, `product already exist ok`, true));
     }
 
+    // ============ save product id in category ===============
+
     const saveProduct = await productModel.create({
       name,
       description,
@@ -62,7 +65,12 @@ const creatProduct = async (req, res) => {
       image: allUploadedImage,
       ...req.body,
     });
+
     if (saveProduct) {
+      const isExistcategory = await categoryModel.findOne({ _id: category });
+      isExistcategory.product.push(saveProduct._id);
+      await isExistcategory.save();
+
       return res
         .status(200)
         .json(
