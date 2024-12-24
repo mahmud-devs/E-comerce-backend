@@ -143,7 +143,9 @@ const getSingleCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const singleCategory = await categoryModel.findById({ _id: id });
+    const singleCategory = await categoryModel
+      .findById({ _id: id })
+      .populate("product");
 
     if (!singleCategory) {
       return res

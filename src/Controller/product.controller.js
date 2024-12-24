@@ -234,7 +234,9 @@ const getAllProduct = async (req, res) => {
 const getSingleProduct = async (req, res) => {
   try {
     const { productId } = req.params;
-    const fetchSingleProduct = await productModel.findById({ _id: productId });
+    const fetchSingleProduct = await productModel
+      .findById({ _id: productId })
+      .populate("category");
     if (fetchSingleProduct) {
       return res
         .status(200)
