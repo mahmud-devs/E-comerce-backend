@@ -16,12 +16,10 @@ async function sendMail(userEmail, opt) {
     from: process.env.EMAIL,
     to: userEmail,
     subject: "Verify Your Eamil ✔",
-    html: template(opt),
+    html: template(opt, userEmail),
   });
 
- 
-    return info;
-  
+  return info;
 }
 
 module.exports = { sendMail };

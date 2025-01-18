@@ -26,7 +26,6 @@ const userSchema = new Schema(
     },
     adress1: {
       type: String,
-      required: [true, "adress1 is missing!!"],
       trim: true,
     },
     adress2: {
@@ -68,10 +67,16 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    recoveryEmail:{
-      type:String,
-      default:null,
-    }
+    recoveryEmail: {
+      type: String,
+      default: null,
+    },
+    cartitem: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Cart",
+      },
+    ],
   },
   {
     timestamps: true,

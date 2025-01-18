@@ -13,11 +13,11 @@ const { makeJWTToken } = require("../Helpers/jwtToken.js");
 
 const Registration = async (req, res) => {
   try {
-    const { firstName, email, mobile, adress1, password } = req.body;
+    const { firstName, email, mobile, password } = req.body;
 
     // ============== check if all inforation is inputed
 
-    if (!firstName || !email || !mobile || !adress1 || !password) {
+    if (!firstName || !email || !mobile || !password) {
       return res
         .status(401)
         .json(new apiError(false, 401, null, "user credential missing", true));
@@ -69,7 +69,6 @@ const Registration = async (req, res) => {
       firstName,
       email,
       mobile,
-      adress1,
       password: hashPassword,
       OTP: otp,
     }).save();
@@ -77,8 +76,15 @@ const Registration = async (req, res) => {
     return res
       .status(200)
       .json(
-        new apiResponce(true, saveUserData, "Registration successfull", false)
+        new apiResponce(
+          true,
+          200,
+          saveUserData,
+          "Registration successfull",
+          false
+        )
       );
+    _;
   } catch (error) {
     console.log(error);
 
@@ -124,7 +130,7 @@ const verifyOtp = async (req, res) => {
     return res
       .status(200)
       .json(
-        new apiResponce(true, isExistUser, "otp verify successfull", false)
+        new apiResponce(true, 200, isExistUser, "otp verify successfull", false)
       );
   } catch (error) {
     console.log(`${error}`);
