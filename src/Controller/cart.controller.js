@@ -65,7 +65,7 @@ const addToCart = async (req, res) => {
   }
 };
 
-// cart item in user
+//============== cart item with user and totalamount , totalQuantity
 const getCartItemuser = async (req, res) => {
   try {
     const user = req.user;
@@ -119,4 +119,117 @@ const getCartItemuser = async (req, res) => {
   }
 };
 
-module.exports = { addToCart, getCartItemuser };
+// =============== cart item increment
+
+const incrementCartItem = async (req, res) => {
+  try {
+    const { cartid } = req.params;
+    const cartItem = await cartModel.findById(cartid);
+    if (!cartItem) {
+      return res
+        .status(501)
+        .json(new apiError(false, 501, null, ` increment Failed !!`));
+    }
+    cartItem.quantity += 1;
+    await cartItem.save();
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(true, 200, cartItem, "increment Sucessfull", false)
+      );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          501,
+          null,
+          `From increment controller Error :  ${error}`
+        )
+      );
+  }
+};
+
+// =============== cart item decrement
+
+const decrementCartItem = async (req, res) => {
+  try {
+    const { cartid } = req.params;
+    const decrementITem = await cartModel.findById(cartid);
+    if (!decrementITem) {
+      return res
+        .status(501)
+        .json(new apiError(false, 501, null, ` decrement Failed !!`));
+    }
+
+    if (decrementITem.quantity > 1) {
+      decrementITem.quantity -= 1;
+      await decrementITem.save();
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(true, 200, decrementITem, "decrement Sucessfull", false)
+      );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          501,
+          null,
+          `From decrement controller Error :  ${error}`
+        )
+      );
+  }
+};
+
+// ================== find cart by user
+
+const userCart = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const cartITem = await cartModel
+      .find({ user: userId })
+      .populate(["user", "product"]);
+
+    const totalpriceofCart = cartITem.reduce(
+      (initailValue, item) => {
+        const { quantity, product } = item;
+        initailValue.totalAmount += product.price * quantity;
+        initailValue.totalQuantity += quantity;
+        return initailValue;
+      },
+      { totalAmount: 0, totalQuantity: 0 }
+    );
+
+    return res.status(200).json(
+      new apiResponce(
+        true,200,
+        {
+          cartITem,
+          totalamount: totalpriceofCart.totalAmount,
+          totalcartitem: totalpriceofCart.totalQuantity,
+        },
+        "Add to cart Sucessfull",
+        false
+      )
+    );
+  } catch (error) {
+    return res
+      .status(501)
+      .json(new apiError(false,501, null, `userCart controller Error :  ${error}`));
+  }
+};
+
+module.exports = {
+  addToCart,
+  getCartItemuser,
+  incrementCartItem,
+  decrementCartItem,
+  userCart
+};
