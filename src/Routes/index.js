@@ -12,6 +12,7 @@ const newArrivalApiRoutes = require("./Api/newArrival.apiRoutes.js");
 const contactApiRoutes = require("./Api/contact.apiRoutes.js");
 const cartApiRoutes = require("./Api/cart.apiRoutes.js");
 const orderApiRoutes = require("./Api/order.apiRoutes.js");
+const paymentApiRoutes = require("./Api/payment.apiroutes.js");
 const baseApi = process.env.BASE_API;
 // ====== using middleware =============
 _.use(baseApi, authApiRoutes);
@@ -25,6 +26,7 @@ _.use(baseApi, newArrivalApiRoutes);
 _.use(baseApi, contactApiRoutes);
 _.use(baseApi, cartApiRoutes);
 _.use(baseApi, orderApiRoutes);
+_.use(baseApi, paymentApiRoutes);
 
 _.use("*", (req, res) => {
   return res.status(404).json({
