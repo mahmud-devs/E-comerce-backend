@@ -3,9 +3,13 @@ const authGuard = async (req, res, next) => {
   try {
     const { token } = req.cookies;
 
-    if (token || req.headers.authorization) {
+    let authToken = "";
+    if (req.headers.authorization) {
+      authToken = req.headers.authorization.replace("Bearer", "").trim();
+    }
+    if (token || authToken) {
       const decoded = await jwt.verify(
-        token || req.headers.authorization,
+        token || authToken,
         process.env.TOKEN_SECRET
       );
 
