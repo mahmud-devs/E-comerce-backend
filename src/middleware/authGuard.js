@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { apiError } = require("../Utils/ApiError");
 const authGuard = async (req, res, next) => {
   try {
     const { token } = req.cookies;

@@ -65,12 +65,15 @@ const Registration = async (req, res) => {
     }
 
     // ======== save data in database
+    const otpExpireTime = new Date().getTime() + 10 * 60 * 1000;
+
     const saveUserData = await new userModel({
       firstName,
       email,
       mobile,
       password: hashPassword,
       OTP: otp,
+      otpExpire: otpExpireTime,
     }).save();
 
     return res
@@ -112,7 +115,7 @@ const verifyOtp = async (req, res) => {
 
     const isExistUser = await userModel
       .findOne({
-        $and: [{ email: emailormobile }, { OTP: otp }],
+        $and: [{ email: emailormobile }],
       })
       .select("-password ");
 
@@ -122,22 +125,102 @@ const verifyOtp = async (req, res) => {
         .json(new apiError(false, 401, null, "invaid otp or email", true));
     }
 
-    isExistUser.userVerified = true;
-    isExistUser.OTP = null;
-    isExistUser.save();
-    // ===========
+    if (isExistUser.OTP === parseInt(otp)) {
+      isExistUser.userVerified = true;
+      isExistUser.OTP = null;
+      isExistUser.otpExpire = null;
+      await isExistUser.save();
 
-    return res
-      .status(200)
-      .json(
-        new apiResponce(true, 200, isExistUser, "otp verify successfull", false)
-      );
+      return res
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            isExistUser,
+            "otp verify successfull",
+            false
+          )
+        );
+    } else if (new Date().getTime() >= isExistUser.otpExpire) {
+      isExistUser.OTP = null;
+      isExistUser.otpExpire = null;
+      await isExistUser.save();
+
+      return res
+        .status(401)
+        .json(new apiResponce(false, 401, null, "Otp time expired ", true));
+    } else {
+      return res
+        .status(401)
+        .json(
+          new apiResponce(
+            false,
+            401,
+            null,
+            "Otp does not match. Try again ",
+            true
+          )
+        );
+    }
+    // ===========
   } catch (error) {
     console.log(`${error}`);
 
     return res
       .status(501)
       .json(new apiError(false, 501, null, "vrify-oto responce error", true));
+  }
+};
+
+// ============ resend otp ============
+
+const resendOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const isRegisterUser = await userModel.findOne({ email });
+    if (!isRegisterUser) {
+      return res
+        .status(501)
+        .json(new apiError(false, 501, null, "Email not found", true));
+    }
+
+    // ======= generate otp
+    const otp = await numberGenerate();
+
+    const otpExpireTime = new Date().getTime() + 10 * 60 * 1000;
+
+    // ========== send verification mail
+
+    const isEmailSent = await sendMail(email, otp);
+
+    if (!isEmailSent?.response) {
+      return res
+        .status(501)
+        .json(
+          new apiError(
+            false,
+            501,
+            null,
+            "mail was not sent, internal server error",
+            true
+          )
+        );
+    }
+
+    if (isEmailSent) {
+      isRegisterUser.OTP = otp;
+      isRegisterUser.otpExpire = otpExpireTime;
+      await isRegisterUser.save();
+
+      return res
+        .status(200)
+        .json(new apiResponce(true, 200, null, "otp send. check email", false));
+    }
+  } catch (error) {
+    return res
+      .status(501)
+      .json(new apiError(false, 501, null, "resend-oto responce error", error));
   }
 };
 
@@ -458,4 +541,5 @@ module.exports = {
   resetPassword,
   resetEmail,
   recoveryEmail,
+  resendOtp,
 };

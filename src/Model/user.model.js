@@ -63,6 +63,9 @@ const userSchema = new Schema(
     resetOTP: {
       type: Number,
     },
+    otpExpire: {
+      type: Number,
+    },
     userVerified: {
       type: Boolean,
       default: false,
