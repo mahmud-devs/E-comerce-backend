@@ -5,18 +5,12 @@ const userModel = require("../Model/user.model.js");
 
 const addToCart = async (req, res) => {
   try {
-    const { user, product, size, color, quantity } = req.body;
-    if (!user || !product || !quantity) {
+    const { product, size, color, quantity } = req.body;
+
+    if (!product || !quantity) {
       return res
         .status(401)
-        .json(
-          new apiError(
-            false,
-            401,
-            null,
-            "Missing user or product or or quantity"
-          )
-        );
+        .json(new apiError(false, 401, null, "Missing  product or quantity"));
     }
 
     // check if the product is already in the cart
@@ -24,14 +18,26 @@ const addToCart = async (req, res) => {
       product,
     });
     if (productInCart) {
+      const totalQuantity = productInCart.quantity + quantity;
+      productInCart.quantity = totalQuantity;
+      await productInCart.save();
+
       return res
-        .status(401)
-        .json(new apiError(false, 401, null, "Product is already in the cart"));
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            null,
+            "Product quantity increased in cart",
+            false
+          )
+        );
     }
 
     // now save the cart information
     const saveCart = await new cartModel({
-      user,
+      user: req.user.userId,
       product,
       size,
       color,
@@ -42,8 +48,8 @@ const addToCart = async (req, res) => {
         .status(501)
         .json(new apiError(false, 501, null, `Add to cart Failed`));
     }
-    // search the user of user database
-    const users = await userModel.findOne({ _id: user });
+    // search the user in user database
+    const users = await userModel.findOne({ _id: req.user.userId });
     users.cartitem.push(saveCart._id);
     await users.save();
     return res
@@ -123,7 +129,8 @@ const getCartItemuser = async (req, res) => {
 
 const incrementCartItem = async (req, res) => {
   try {
-    const { cartid } = req.params;
+    const { cartid } = req.query;
+
     const cartItem = await cartModel.findById(cartid);
     if (!cartItem) {
       return res
@@ -156,7 +163,7 @@ const incrementCartItem = async (req, res) => {
 
 const decrementCartItem = async (req, res) => {
   try {
-    const { cartid } = req.params;
+    const { cartid } = req.query;
     const decrementITem = await cartModel.findById(cartid);
     if (!decrementITem) {
       return res
@@ -209,7 +216,8 @@ const userCart = async (req, res) => {
 
     return res.status(200).json(
       new apiResponce(
-        true,200,
+        true,
+        200,
         {
           cartITem,
           totalamount: totalpriceofCart.totalAmount,
@@ -222,7 +230,59 @@ const userCart = async (req, res) => {
   } catch (error) {
     return res
       .status(501)
-      .json(new apiError(false,501, null, `userCart controller Error :  ${error}`));
+      .json(
+        new apiError(false, 501, null, `userCart controller Error :  ${error}`)
+      );
+  }
+};
+
+// =================== delete cart item
+
+const deleteCartItem = async (req, res) => {
+  try {
+    const { cartId } = req.query;
+
+    const deletedCartItem = await cartModel.findOneAndDelete({
+      _id: cartId,
+      user: req.user.userId,
+    });
+
+    const findUserINfo = await userModel.findById({
+      _id: req.user.userId,
+    });
+
+    await findUserINfo.cartitem.pull(cartId);
+    await findUserINfo.save();
+
+    if (!deletedCartItem) {
+      return res
+        .status(404)
+        .json(new apiError(false, 404, null, "Cart item not found", true));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(
+          true,
+          200,
+          deletedCartItem,
+          "Cart item deleted successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(
+          false,
+          500,
+          null,
+          `deleteCartItem controller Error: ${error}`,
+          true
+        )
+      );
   }
 };
 
@@ -231,5 +291,6 @@ module.exports = {
   getCartItemuser,
   incrementCartItem,
   decrementCartItem,
-  userCart
+  userCart,
+  deleteCartItem,
 };

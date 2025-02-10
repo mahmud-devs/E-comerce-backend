@@ -3,6 +3,8 @@ const { apiError } = require("../Utils/ApiError.js");
 
 const invoiceModel = require("../Model/invoice.model.js");
 const orderModel = require("../Model/order.model");
+const userModel = require("../Model/user.model.js");
+const cartModel = require("../Model/cart.model.js");
 
 const sucessPayment = async (req, res) => {
   try {
@@ -18,6 +20,15 @@ const sucessPayment = async (req, res) => {
     // ============ update payment status
 
     const order = await orderModel.findById(invoice.orderId);
+    const userInfo = await userModel.findById(invoice.user_id);
+
+    console.log(userInfo);
+
+    order.cartItem.forEach(async (item) => {
+      await userInfo.cartitem.pull(item);
+      await cartModel.findOneAndDelete({ _id: item });
+    });
+    await userInfo.save();
     order.paymentinfo.isPaid = true;
     await order.save();
     return res.redirect(`${process.env.FRONTEND_DOMAIN}/Success`);
