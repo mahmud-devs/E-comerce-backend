@@ -138,6 +138,7 @@ const getSingleBanner = async (req, res) => {
 const updateSingleBanner = async (req, res) => {
   try {
     const { bannerId } = req.params;
+
     const isExist = await bannerModel.findById(bannerId);
 
     if (!isExist) {
@@ -145,41 +146,56 @@ const updateSingleBanner = async (req, res) => {
         .status(501)
         .json(new apiError(false, 501, null, `no banner data found `, true));
     }
+    const bannerImage = req.files?.image;
+    
 
     const image = isExist.image;
     let deleteCloudinaryImage = null;
+    const updatedObject = {};
     if (req.files?.image) {
       const splitImage = image.split("/");
       const cloudinaryImageId =
         splitImage[splitImage.length - 1]?.split(".")[0];
 
       deleteCloudinaryImage = await cloudinaryDeleteImage(cloudinaryImageId);
-    }
 
-    if (deleteCloudinaryImage) {
+      // ================ upload new image ===================
       const bannerImage = req.files?.image;
 
       const uploadImage = await cloudnirayFileUpload(bannerImage[0].path);
 
-      const updateBanner = await bannerModel.findByIdAndUpdate(
-        { _id: bannerId },
-        { ...req.body, image: uploadImage.secure_url },
-        { new: true }
-      );
+      updatedObject.image = uploadImage.secure_url;
+    }
 
-      if (updateBanner) {
-        return res
-          .status(200)
-          .json(
-            new apiResponce(
-              true,
-              200,
-              updateBanner,
-              ` banner updated  successfully`,
-              false
-            )
-          );
-      }
+    // ==================== req name ====================
+
+    if (req.body.name) {
+      updatedObject.name = req.body.name;
+    }
+
+    // ================= update banner =====================
+
+    // console.log(updatedObject);
+
+    // return;
+
+    const updateBanner = await bannerModel.findByIdAndUpdate(
+      { _id: bannerId },
+      { ...updatedObject },
+      { new: true }
+    );
+    if (updateBanner) {
+      return res
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            updateBanner,
+            ` banner updated  successfully`,
+            false
+          )
+        );
     }
     return res
       .status(501)
