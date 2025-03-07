@@ -23,23 +23,23 @@ const createCategory = async (req, res) => {
         );
     }
 
-    if (!req.files?.image) {
-      return res
-        .status(401)
-        .json(
-          new apiError(
-            false,
-            401,
-            null,
-            `category image credential missing `,
-            true
-          )
-        );
-    }
+    // if (!req.files?.image) {
+    //   return res
+    //     .status(401)
+    //     .json(
+    //       new apiError(
+    //         false,
+    //         401,
+    //         null,
+    //         `category image credential missing `,
+    //         true
+    //       )
+    //     );
+    // }
 
-    const categoryImage = req.files?.image;
+    // const categoryImage = req.files?.image;
 
-    const uploadImage = await cloudnirayFileUpload(categoryImage[0].path);
+    // const uploadImage = await cloudnirayFileUpload(categoryImage[0].path);
 
     // =========== check if upcoming category is alreay in use
     const isExistCategory = await categoryModel.find({ name: name });
@@ -63,7 +63,7 @@ const createCategory = async (req, res) => {
     const saveCategory = await categoryModel.create({
       name,
       description,
-      image: uploadImage.secure_url,
+      // image: uploadImage.secure_url,
     });
 
     if (!saveCategory) {
@@ -180,7 +180,7 @@ const getSingleCategory = async (req, res) => {
   }
 };
 
-// ============ category update ==========
+// ============ category update ===============
 
 const updateSingleCategory = async (req, res) => {
   try {
