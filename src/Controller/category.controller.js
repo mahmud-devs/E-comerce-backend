@@ -180,7 +180,7 @@ const getSingleCategory = async (req, res) => {
   }
 };
 
-// ============ category update ===============
+// ============ category update =======================
 
 const updateSingleCategory = async (req, res) => {
   try {
