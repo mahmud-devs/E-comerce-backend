@@ -41,16 +41,20 @@ const productSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "store",
     },
-    category: {
-      type: Schema.Types.ObjectId,
-      ref: "category",
-      required: true,
-    },
-    subcategory: {
-      type: Schema.Types.ObjectId,
-      ref: "subcategory",
-      required: true,
-    },
+    category: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "category",
+        required: true,
+      },
+    ],
+    subcategory: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "subcategory",
+        required: true,
+      },
+    ],
     image: [
       {
         type: String,

@@ -80,6 +80,7 @@ const userSchema = new Schema(
         ref: "Cart",
       },
     ],
+    purchasedCart: [{ type: Schema.Types.ObjectId, ref: "PurchasedCart" }],
   },
   {
     timestamps: true,

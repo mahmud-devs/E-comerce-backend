@@ -145,7 +145,7 @@ const getSingleCategory = async (req, res) => {
 
     const singleCategory = await categoryModel
       .findById({ _id: id })
-      .populate("product");
+      .populate(["product", "subCategory"]);
 
     if (!singleCategory) {
       return res
@@ -272,9 +272,49 @@ const updateSingleCategory = async (req, res) => {
   }
 };
 
+// ======================= delete category ==================
+
+const deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleteSingleCategory = await categoryModel.findOneAndDelete({
+      _id: id,
+    });
+    if (deleteSingleCategory) {
+      return res
+        .status(200)
+        .json(
+          new apiResponce(
+            true,
+            200,
+            deleteSingleCategory,
+            `category deleted successfully `,
+            false
+          )
+        );
+    }
+    return res
+      .status(501)
+      .json(new apiError(false, 501, null, `failed to delete category`, true));
+  } catch (error) {
+    return res
+      .status(501)
+      .json(
+        new apiError(
+          false,
+          501,
+          null,
+          `error from delete category controller ${error}`,
+          true
+        )
+      );
+  }
+};
+
 module.exports = {
   createCategory,
   getAllCategory,
   getSingleCategory,
   updateSingleCategory,
+  deleteCategory,
 };

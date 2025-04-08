@@ -195,7 +195,9 @@ const updateProduct = async (req, res) => {
 
 const getAllProduct = async (req, res) => {
   try {
-    const fetchAllProduct = await productModel.find();
+    const fetchAllProduct = await productModel
+      .find()
+      .populate(["category", "subcategory"]);
     if (fetchAllProduct?.length) {
       return res
         .status(200)

@@ -148,4 +148,51 @@ const placeorder = async (req, res) => {
   }
 };
 
-module.exports = { placeorder };
+// ===================== get all order =====================
+
+const getAllOrders = async (req, res) => {
+  try {
+    // Fetch all orders
+    const orders = await orderModel.find().populate({
+      path: "user",
+      populate: {
+        path: "purchasedCart",
+        model: "PurchasedCart",
+        populate: {
+          path: "product",
+          model: "product",
+        },
+      },
+    });
+    if (!orders.length) {
+      return res
+        .status(404)
+        .json(new apiError(false, 404, null, "No orders found"));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(
+          true,
+          200,
+          { orders },
+          "Orders fetched successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(
+          false,
+          500,
+          null,
+          `Error fetching orders: ${error.message}`
+        )
+      );
+  }
+};
+
+module.exports = { placeorder, getAllOrders };

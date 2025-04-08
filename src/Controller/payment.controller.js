@@ -5,6 +5,9 @@ const invoiceModel = require("../Model/invoice.model.js");
 const orderModel = require("../Model/order.model");
 const userModel = require("../Model/user.model.js");
 const cartModel = require("../Model/cart.model.js");
+const purchasedCartModel = require("../Model/purchasedCart.model.js");
+
+
 
 const sucessPayment = async (req, res) => {
   try {
@@ -17,29 +20,45 @@ const sucessPayment = async (req, res) => {
     invoice.payment_status = "Success";
     await invoice.save();
 
-    // ============ update payment status
-
+    // ============ Update payment status ============
     const order = await orderModel.findById(invoice.orderId);
     const userInfo = await userModel.findById(invoice.user_id);
 
-    console.log(userInfo);
+    const purchasedItems = []; //  Array to store purchaed cart item IDs 
 
-    order.cartItem.forEach(async (item) => {
-      await userInfo.cartitem.pull(item);
-      await cartModel.findOneAndDelete({ _id: item });
-    });
-    await userInfo.save();
+    // Loop through each item in the cart before deleting
+    for (const item of order.cartItem) {
+      const cartItem = await cartModel.findById(item);
+      if (cartItem) {
+        //  Create a new PurchasedCart entry to save the purchased item 
+        const purchasedCartItem = await new purchasedCartModel({
+          user: cartItem.user,
+          product: cartItem.product,
+          size: cartItem.size,
+          color: cartItem.color,
+          quantity: cartItem.quantity,
+          subTotal: cartItem.subTotal,
+        }).save();
+
+        purchasedItems.push(purchasedCartItem._id); //  Store PurchasedCart ID for later reference 
+
+        await userInfo.cartitem.pull(cartItem._id); // Remove from cart
+        await cartModel.findByIdAndDelete(cartItem._id); // Delete original cart item
+      }
+    }
+
+    //  Push all purchased cart item IDs to the new `purchasedCart` field in the User model 
+    userInfo.purchasedCart.push(...purchasedItems);
+    await userInfo.save(); // Save user with updated purchased cart
+
     order.paymentinfo.isPaid = true;
     await order.save();
+
     return res.redirect(`${process.env.FRONTEND_DOMAIN}/Success`);
-    // return res
-    //   .status(200)
-    //   .json(new apiResponce(true, 200, order, `Payment Success`));
   } catch (error) {
     return res.status(501).json(new apiError(false, null, `Payment Fail`));
   }
 };
-
 // ============== failed payment
 
 const failPayment = async (req, res) => {

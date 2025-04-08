@@ -8,7 +8,9 @@ const bestSellingModel = require("../Model/bestSelling.model.js");
 const createBestSelling = async (req, res) => {
   try {
     const { product } = req.body;
-    const isExistbestSelling = await bestSellingModel.findOne({ product: product });
+    const isExistbestSelling = await bestSellingModel.findOne({
+      product: product,
+    });
     if (isExistbestSelling) {
       return res
         .status(401)
@@ -68,7 +70,13 @@ const createBestSelling = async (req, res) => {
 
 const getAllBestSelling = async (req, res) => {
   try {
-    const fetchAllbestSelling = await bestSellingModel.find().populate("product");
+    const fetchAllbestSelling = await bestSellingModel.find().populate({
+      path: "product",
+      populate: {
+        path: "category", // Populating the category inside the product
+      },
+    });
+
     if (!fetchAllbestSelling?.length) {
       return res
         .status(501)
