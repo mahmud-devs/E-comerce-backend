@@ -8,6 +8,8 @@ const bestSellingModel = require("../Model/bestSelling.model.js");
 const createBestSelling = async (req, res) => {
   try {
     const { product } = req.body;
+
+   
     const isExistbestSelling = await bestSellingModel.findOne({
       product: product,
     });
@@ -24,6 +26,7 @@ const createBestSelling = async (req, res) => {
           )
         );
     }
+    
     const savebestSelling = await bestSellingModel.create({
       product: product,
     });

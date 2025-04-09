@@ -195,4 +195,84 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-module.exports = { placeorder, getAllOrders };
+// =============== delete order ===============================
+
+const deleteOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    // Check if order exists
+    const Deleteorder = await orderModel.findByIdAndDelete(orderId);
+    if (!Deleteorder) {
+      return res
+        .status(404)
+        .json(new apiError(false, 404, null, "Order not found"));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(
+          true,
+          200,
+          Deleteorder,
+          "Order deleted successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(false, 500, null, `Error deleting order: ${error.message}`)
+      );
+  }
+};
+
+// ====================== get single order =============
+
+const getSingleOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    // Fetch the order by ID and populate relevant fields
+    const order = await orderModel
+      .findById(orderId)
+      .populate({
+        path: "user",
+      })
+      .populate({
+        path: "purchasedCart",
+        populate: {
+          path: "product", // Assuming each purchasedCart item references a product
+          model: "product",
+        },
+      });
+
+    if (!order) {
+      return res
+        .status(404)
+        .json(new apiError(false, 404, null, "Order not found"));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(
+          true,
+          200,
+          { order },
+          "Order fetched successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(false, 500, null, `Error fetching order: ${error.message}`)
+      );
+  }
+};
+
+module.exports = { placeorder, getAllOrders, deleteOrder, getSingleOrder };

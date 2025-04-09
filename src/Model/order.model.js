@@ -12,6 +12,12 @@ const orderSchema = new Schema(
         ref: "Cart",
       },
     ],
+    purchasedCart: [
+      {
+        type: Types.ObjectId,
+        ref: "PurchasedCart",
+      },
+    ],
     customerinfo: {
       address1: {
         type: String,

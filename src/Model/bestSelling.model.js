@@ -6,11 +6,6 @@ const bestSellingSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "product",
   },
-  category: {
-    type: Schema.Types.ObjectId,
-    ref: "category",
-    required: true,
-  },
 });
 
 module.exports = mongoose.model("bestSelling", bestSellingSchema);
