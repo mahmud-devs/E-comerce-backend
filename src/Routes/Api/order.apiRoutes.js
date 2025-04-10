@@ -6,9 +6,10 @@ const {
   getAllOrders,
   deleteOrder,
   getSingleOrder,
+  updateOrderStatus,
 } = require("../../Controller/order.controller");
 _.route("/placeorder").post(authGuard, placeorder);
 _.route("/allOrder").get(getAllOrders);
-_.route("/order/:orderId").delete(deleteOrder).get(getSingleOrder);
+_.route("/order/:orderId").delete(deleteOrder).get(getSingleOrder).put(updateOrderStatus)
 
 module.exports = _;

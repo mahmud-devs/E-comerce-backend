@@ -275,4 +275,64 @@ const getSingleOrder = async (req, res) => {
   }
 };
 
-module.exports = { placeorder, getAllOrders, deleteOrder, getSingleOrder };
+// ================== update order status===================
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    // Validate input
+
+  
+    if (!status) {
+      return res
+        .status(400)
+        .json(new apiError(false, 400, null, "Status is required"));
+    }
+
+    // Find and update the order
+    const updatedOrder = await orderModel.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true } // Return the updated order
+    );
+
+    if (!updatedOrder) {
+      return res
+        .status(404)
+        .json(new apiError(false, 404, null, "Order not found"));
+    }
+
+    return res
+      .status(200)
+      .json(
+        new apiResponce(
+          true,
+          200,
+          { updatedOrder },
+          "Order status updated successfully",
+          false
+        )
+      );
+  } catch (error) {
+    return res
+      .status(500)
+      .json(
+        new apiError(
+          false,
+          500,
+          null,
+          `Error updating order status: ${error.message}`
+        )
+      );
+  }
+};
+
+module.exports = {
+  placeorder,
+  getAllOrders,
+  deleteOrder,
+  getSingleOrder,
+  updateOrderStatus,
+};
